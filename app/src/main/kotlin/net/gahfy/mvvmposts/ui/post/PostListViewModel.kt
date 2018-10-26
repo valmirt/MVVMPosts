@@ -7,6 +7,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import net.gahfy.mvvmposts.R
+import net.gahfy.mvvmposts.adapter.PostListAdapter
 import net.gahfy.mvvmposts.base.BaseViewModel
 import net.gahfy.mvvmposts.model.Post
 import net.gahfy.mvvmposts.model.PostDao
@@ -35,15 +36,14 @@ class PostListViewModel(private val postDao: PostDao):BaseViewModel(){
 
     private fun loadPosts(){
         subscription = Observable.fromCallable { postDao.all }
-                .concatMap {
-                    dbPostList ->
-                        if(dbPostList.isEmpty())
-                            postApi.getPosts().concatMap {
-                                            apiPostList -> postDao.insertAll(*apiPostList.toTypedArray())
-                                 Observable.just(apiPostList)
-                                       }
-                        else
-                            Observable.just(dbPostList)
+                .concatMap { dbPostList ->
+                    if(dbPostList.isEmpty()){
+                        postApi.getPosts().concatMap { apiPostList ->
+                            //* operador de propagacao
+                            postDao.insertAll(*apiPostList.toTypedArray())
+                             Observable.just(apiPostList)
+                        }
+                    } else Observable.just(dbPostList)
                 }
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())

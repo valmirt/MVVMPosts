@@ -24,8 +24,9 @@ class PostListActivity: AppCompatActivity() {
         binding.postList.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
 
         viewModel = ViewModelProviders.of(this, ViewModelFactory(this)).get(PostListViewModel::class.java)
-        viewModel.errorMessage.observe(this, Observer {
-            errorMessage -> if(errorMessage != null) showError(errorMessage) else hideError()
+        viewModel.errorMessage.observe(this, Observer { errorMessage ->
+            if(errorMessage != null) showError(errorMessage)
+            else hideError()
         })
         binding.viewModel = viewModel
     }
